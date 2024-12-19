@@ -2,7 +2,10 @@ name: Docker CI Workflow
 
 on:
   workflow_dispatch:  # Manual trigger for the workflow
-
+    inputs:
+      release_tag:
+        description: 'Reminder!!! This will be deployed to Production. Please Enter Release Tag. Please make sure you have already created and pushed the entered tag otherwise pipeline may fail.'
+        required: true  
 jobs:
   build:
     runs-on: ubuntu-latest  # Run on the latest Ubuntu environment
