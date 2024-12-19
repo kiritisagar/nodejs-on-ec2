@@ -1,7 +1,7 @@
 name: Docker CI Workflow
 
 on:
- workflow_dispatch:  # Manual trigger for the workflow
+  workflow_dispatch:  # Manual trigger for the workflow
 
 jobs:
   build:
@@ -10,29 +10,29 @@ jobs:
     steps:
       # Checkout the repository
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3  # Use the latest version of the checkout action
 
       # Set up Docker
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      # Log in to Docker Hub
+      # Log in to Docker Hub securely using GitHub Secrets
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}  # Docker Hub username from GitHub secrets
-          password: ${{ secrets.DOCKER_PASSWORD }}  # Docker Hub password from GitHub secrets
+          username: ${{ secrets.DOCKER_USERNAME }}  # Reference Docker Hub username stored in GitHub Secrets
+          password: ${{ secrets.DOCKER_PASSWORD }}  # Reference Docker Hub password stored in GitHub Secrets
 
       # Build the Docker image
       - name: Build Docker image
         run: |
           docker build -t my-app:latest .
-          
+
       # Tag the image for Docker Hub
       - name: Tag Docker image
         run: |
           docker tag my-app:latest ${{ secrets.DOCKER_USERNAME }}/my-app:latest
-          
+
       # Push the Docker image to Docker Hub
       - name: Push Docker image
         run: |
