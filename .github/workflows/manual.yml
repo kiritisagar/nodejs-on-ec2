@@ -23,17 +23,26 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}  # Reference Docker Hub username stored in GitHub Secrets
           password: ${{ secrets.DOCKER_PASSWORD }}  # Reference Docker Hub password stored in GitHub Secrets
 
+      # Define Docker image name and tag
+      - name: Set image name and tag
+        id: vars
+        run: |
+          IMAGE_NAME="my-app"
+          TAG="${GITHUB_SHA:0:7}"  # Use the first 7 characters of the commit hash as the tag
+          echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
+          echo "TAG=$TAG" >> $GITHUB_ENV
+
       # Build the Docker image
       - name: Build Docker image
         run: |
-          docker build -t my-app:latest .
+          docker build -t ${{ env.IMAGE_NAME }}:${{ env.TAG }} .
 
       # Tag the image for Docker Hub
       - name: Tag Docker image
         run: |
-          docker tag my-app:latest ${{ secrets.DOCKER_USERNAME }}/my-app:latest
+          docker tag ${{ env.IMAGE_NAME }}:${{ env.TAG }} ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
 
       # Push the Docker image to Docker Hub
       - name: Push Docker image
         run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/my-app:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
