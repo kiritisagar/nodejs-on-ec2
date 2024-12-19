@@ -42,14 +42,14 @@ jobs:
       # Build the Docker image
       - name: Build Docker image
         run: |
-          docker build -t ${{ env.IMAGE_NAME }}:${{ env.TAG }} .
+          docker build -t ${{ env.TAG }}:${{ env.TAG }} .
 
       # Tag the image for Docker Hub
       - name: Tag Docker image
         run: |
-          docker tag ${{ env.IMAGE_NAME }}:${{ env.TAG }} ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
+          docker tag ${{ env.TAG }}:${{ env.TAG }} ${{ secrets.DOCKER_USERNAME }}/${{ env.TAG }}:${{ env.TAG }}
 
       # Push the Docker image to Docker Hub
       - name: Push Docker image
         run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ env.TAG }}:${{ env.TAG }}
