@@ -23,12 +23,13 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}  # Reference Docker Hub username stored in GitHub Secrets
           password: ${{ secrets.DOCKER_PASSWORD }}  # Reference Docker Hub password stored in GitHub Secrets
 
-      # Define Docker image name and tag
+      # Define Docker image name and timestamp-based tag
       - name: Set image name and tag
         id: vars
         run: |
           IMAGE_NAME="my-app"
-          TAG="${GITHUB_SHA:0:7}"  # Use the first 7 characters of the commit hash as the tag
+          TIMESTAMP=$(date +'%Y%m%d%H%M%S')  # Current timestamp (year, month, day, hour, minute, second)
+          TAG="${GITHUB_SHA:0:7}-${TIMESTAMP}"  # Combine the commit hash (first 7 characters) and timestamp
           echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
           echo "TAG=$TAG" >> $GITHUB_ENV
 
