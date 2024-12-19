@@ -3,13 +3,16 @@ name: Docker CI Workflow
 on:
   workflow_dispatch:  # Manual trigger for the workflow
     inputs:
-      lease_tag:
+      release_tag:
         description: 'Reminder!!! This will be deployed to Production. Please Enter Release Tag. Please make sure you have already created and pushed the entered tag, otherwise the pipeline may fail.'
         required: true
-
+  
 jobs:
   build:
     runs-on: ubuntu-latest  # Run on the latest Ubuntu environment
+
+    env:
+      TAG: ${{ github.event.inputs.release_tag }}  # Set TAG environment variable from the lease_tag input
 
     steps:
       # Checkout the repository
@@ -31,12 +34,11 @@ jobs:
       - name: Set image name and tag
         id: vars
         run: |
-          TAG="${{ github.event.inputs.lease_tag }}"  # Use the lease_tag as the image name
           TIMESTAMP=$(date +'%Y%m%d%H%M')  # Current timestamp (year, month, day, hour, minute, second)
-          IMAGE_NAME="${TAG}-${TIMESTAMP}"  # Combine the lease_tag and timestamp
+          IMAGE_NAME="${{ env.TAG }}-${TIMESTAMP}"  # Combine the lease_tag and timestamp
           
-          echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
-          echo "TAG=$TAG" >> $GITHUB_ENV
+          echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV  # Save IMAGE_NAME for later steps
+          echo "TAG=${{ env.TAG }}" >> $GITHUB_ENV  # Save TAG for later steps
 
       # Build the Docker image
       - name: Build Docker image
