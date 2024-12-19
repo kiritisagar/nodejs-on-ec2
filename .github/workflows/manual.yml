@@ -15,15 +15,6 @@ jobs:
       TAG: ${{ github.event.inputs.release_tag }}  # Assign the release tag from the workflow input
 
     steps:
-      # Append timestamp to the image name
-      - name: Append timestamp to image name
-        id: append_timestamp
-        run: |
-          TIMESTAMP=$(date +'%Y%m%d%H%M')  # Current timestamp (year, month, day, hour, minute, second)
-          IMAGE_NAME="${{ env.TAG }}-${TIMESTAMP}"  # Combine the release_tag and timestamp
-          echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV  # Save IMAGE_NAME for later steps
-          echo "TIMESTAMP=$TIMESTAMP" >> $GITHUB_ENV  # Save TIMESTAMP for later steps
-
       # Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v3  # Use the latest version of the checkout action
@@ -32,6 +23,15 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
+      # Append timestamp immediately after checkout and setup
+      - name: Append Timestamp to TAG
+        id: timestamp
+        run: |
+          timestamp=$(date +%Y%m%d%H%M%S)
+          echo "TIMESTAMP=$timestamp" >> $GITHUB_ENV
+          echo "Updated TAG=${{ env.TAG }}-$timestamp"
+          echo "TAG=${{ env.TAG }}-$timestamp" >> $GITHUB_ENV
+
       # Log in to Docker Hub securely using GitHub Secrets
       - name: Login to Docker Hub
         uses: docker/login-action@v2
@@ -39,17 +39,17 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}  # Reference Docker Hub username stored in GitHub Secrets
           password: ${{ secrets.DOCKER_PASSWORD }}  # Reference Docker Hub password stored in GitHub Secrets
 
-      # Build the Docker image
+      # Build the Docker image with the provided TAG
       - name: Build Docker image
         run: |
-          docker build -t ${{ env.TAG }}:${{ env.TAG }} .
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/${{ env.TAG }} .
 
-      # Tag the image for Docker Hub
-      - name: Tag Docker image
+      # Tag the image for Docker Hub with the updated TAG
+      - name: Tag Docker image with updated TAG
         run: |
-          docker tag ${{ env.TAG }}:${{ env.TAG }} ${{ secrets.DOCKER_USERNAME }}/${{ env.TAG }}:${{ env.TAG }}
+          docker tag ${{ secrets.DOCKER_USERNAME }}/${{ env.TAG }} ${{ secrets.DOCKER_USERNAME }}/${{ env.TAG }}
 
-      # Push the Docker image to Docker Hub
-      - name: Push Docker image
+      # Push the Docker image to Docker Hub with the original TAG
+      - name: Push Docker image with original TAG
         run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/${{ env.TAG }}:${{ env.TAG }}
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ env.TAG }}
