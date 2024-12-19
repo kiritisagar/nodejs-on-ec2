@@ -15,6 +15,12 @@ jobs:
       TAG: ${{ github.event.inputs.release_tag }}  # Assign the release tag from the workflow input
 
     steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3  # Use the latest version of the checkout action
+        with:
+          ref: ${{ github.event.inputs.release_tag }} 
+
       # Append timestamp immediately after checkout and setup
       - name: Append Timestamp to TAG
         id: timestamp
@@ -24,9 +30,6 @@ jobs:
           echo "Updated TAG=${{ env.TAG }}-$timestamp"
           echo "TAG=${{ env.TAG }}-$timestamp" >> $GITHUB_ENV
 
-      # Checkout the repository
-      - name: Checkout code
-        uses: actions/checkout@v3  # Use the latest version of the checkout action
 
       # Set up Docker
       - name: Set up Docker Buildx
