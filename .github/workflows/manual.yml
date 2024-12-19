@@ -6,15 +6,24 @@ on:
       release_tag:
         description: 'Reminder!!! This will be deployed to Production. Please Enter Release Tag. Please make sure you have already created and pushed the entered tag, otherwise the pipeline may fail.'
         required: true
-  
+
 jobs:
   build:
     runs-on: ubuntu-latest  # Run on the latest Ubuntu environment
 
     env:
-      TAG: ${{ github.event.inputs.release_tag }}  # Set TAG environment variable from the lease_tag input
+      TAG: ${{ github.event.inputs.release_tag }}  # Assign the release tag from the workflow input
 
     steps:
+      # Append timestamp to the image name
+      - name: Append timestamp to image name
+        id: append_timestamp
+        run: |
+          TIMESTAMP=$(date +'%Y%m%d%H%M')  # Current timestamp (year, month, day, hour, minute, second)
+          IMAGE_NAME="${{ env.TAG }}-${TIMESTAMP}"  # Combine the release_tag and timestamp
+          echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV  # Save IMAGE_NAME for later steps
+          echo "TIMESTAMP=$TIMESTAMP" >> $GITHUB_ENV  # Save TIMESTAMP for later steps
+
       # Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v3  # Use the latest version of the checkout action
@@ -29,16 +38,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}  # Reference Docker Hub username stored in GitHub Secrets
           password: ${{ secrets.DOCKER_PASSWORD }}  # Reference Docker Hub password stored in GitHub Secrets
-
-      # Define Docker image name and tag
-      - name: Set image name and tag
-        id: vars
-        run: |
-          TIMESTAMP=$(date +'%Y%m%d%H%M')  # Current timestamp (year, month, day, hour, minute, second)
-          IMAGE_NAME="${{ env.TAG }}-${TIMESTAMP}"  # Combine the lease_tag and timestamp
-          
-          echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV  # Save IMAGE_NAME for later steps
-          echo "TAG=${{ env.TAG }}" >> $GITHUB_ENV  # Save TAG for later steps
 
       # Build the Docker image
       - name: Build Docker image
